@@ -1,121 +1,156 @@
-<div class="pac-card" id="pac-card">
-  <div>
-    <div id="title">Autocomplete search</div>
-    <div id="type-selector" class="pac-controls">
-      <input
-          type="radio"
-          name="type"
-          id="changetype-all"
-          checked="checked"
-      />
-      <label for="changetype-all">All</label>
-
-      <input type="radio" name="type" id="changetype-establishment" />
-      <label for="changetype-establishment">Establishments</label>
-
-      <input type="radio" name="type" id="changetype-address" />
-      <label for="changetype-address">Addresses</label>
-
-      <input type="radio" name="type" id="changetype-geocode" />
-      <label for="changetype-geocode">Geocodes</label>
-    </div>
-    <div id="strict-bounds-selector" class="pac-controls">
-      <input type="checkbox" id="use-strict-bounds" value="" />
-      <label for="use-strict-bounds">Strict Bounds</label>
-    </div>
-  </div>
-  <div id="pac-container">
-    <input id="pac-input" type="text" placeholder="Enter a location" />
-  </div>
-</div>
-<div id="map"></div>
-<div id="infowindow-content">
-  <img src="" width="16" height="16" id="place-icon" />
-  <span id="place-name" class="title"></span><br />
-  <span id="place-address"></span>
-</div>
-<script src="https://maps.googleapis.com/maps/api/js?key=&libraries=places">
-    function initMap() {
-        const map = new google.maps.Map(document.getElementById("map"), {
-            center: { lat: -33.8688, lng: 151.2195 },
-            zoom: 13,
-        });
-        const card = document.getElementById("pac-card");
-        const input = document.getElementById("pac-input");
-        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(card);
-        const autocomplete = new google.maps.places.Autocomplete(input);
-        // Bind the map's bounds (viewport) property to the autocomplete object,
-        // so that the autocomplete requests use the current map bounds for the
-        // bounds option in the request.
-        autocomplete.bindTo("bounds", map);
-        // Set the data fields to return when the user selects a place.
-        autocomplete.setFields(["address_components", "geometry", "icon", "name"]);
-        const infowindow = new google.maps.InfoWindow();
-        const infowindowContent = document.getElementById("infowindow-content");
-        infowindow.setContent(infowindowContent);
-        const marker = new google.maps.Marker({
-            map,
-            anchorPoint: new google.maps.Point(0, -29),
-        });
-        autocomplete.addListener("place_changed", () => {
-            infowindow.close();
-            marker.setVisible(false);
-            const place = autocomplete.getPlace();
-
-            if (!place.geometry) {
-                // User entered the name of a Place that was not suggested and
-                // pressed the Enter key, or the Place Details request failed.
-                window.alert("No details available for input: '" + place.name + "'");
-                return;
-            }
-
-            // If the place has a geometry, then present it on a map.
-            if (place.geometry.viewport) {
-                map.fitBounds(place.geometry.viewport);
-            } else {
-                map.setCenter(place.geometry.location);
-                map.setZoom(17); // Why 17? Because it looks good.
-            }
-            marker.setPosition(place.geometry.location);
-            marker.setVisible(true);
-            let address = "";
-
-            if (place.address_components) {
-                address = [
-                    (place.address_components[0] &&
-                        place.address_components[0].short_name) ||
-                    "",
-                    (place.address_components[1] &&
-                        place.address_components[1].short_name) ||
-                    "",
-                    (place.address_components[2] &&
-                        place.address_components[2].short_name) ||
-                    "",
-                ].join(" ");
-            }
-            infowindowContent.children["place-icon"].src = place.icon;
-            infowindowContent.children["place-name"].textContent = place.name;
-            infowindowContent.children["place-address"].textContent = address;
-            infowindow.open(map, marker);
-        });
-
-        // Sets a listener on a radio button to change the filter type on Places
-        // Autocomplete.
-        function setupClickListener(id, types) {
-            const radioButton = document.getElementById(id);
-            radioButton.addEventListener("click", () => {
-                autocomplete.setTypes(types);
-            });
-        }
-        setupClickListener("changetype-all", []);
-        setupClickListener("changetype-address", ["address"]);
-        setupClickListener("changetype-establishment", ["establishment"]);
-        setupClickListener("changetype-geocode", ["geocode"]);
-        document
-            .getElementById("use-strict-bounds")
-            .addEventListener("click", function () {
-                console.log("Checkbox clicked! New state=" + this.checked);
-                autocomplete.setOptions({ strictBounds: this.checked });
-            });
+<style>
+    #notice {
+        margin: 0px;
+        color: #f33;
+        display: none;
     }
-  </script>
+</style>
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=287f9eb4-814a-4af3-9e64-9d6c7e5f48d5" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+    var findAddressInput = getInputAddress();
+    var mapLoader   = document.getElementsByClassName('{{ input_address }}')[0];
+    
+    if(!findAddressInput) {
+        let interval =  setInterval(function() {
+                            findAddressInput = getInputAddress();
+                            mapLoader   = document.getElementsByClassName('{{ class_map_loader }}')[0];
+                            
+                            if(findAddressInput) {
+                                clearInterval(interval);
+                                ymaps.ready(yMapsInit(findAddressInput, mapLoader));
+                            }
+                        }, 2000)
+    }
+})
+
+function getInputAddress() {
+    var el;
+    if('{{ input_address_type }}' === '0') {
+        el = document.getElementsByClassName('{{ input_address }}')[0];
+    } else if ('{{ input_address_type }}' === '1') {
+        el = document.getElementById('{{ input_address }}');
+    } else {
+        el = document.getElementsByName('{{ input_address }}')[0];
+    }
+    return el;
+}
+
+function yMapsInit(inputAddress, mapLoader) {
+    console.log(inputAddress)
+    // Подключаем поисковые подсказки к полю ввода.
+    var suggestView = new ymaps.SuggestView(inputAddress),
+        map,
+        placemark;
+        
+    suggestView.events.add("select", function(e){
+        geocode();
+    })
+    
+    var infoSpan = document.createElement("p");
+        infoSpan.innerHTML = '213';
+        infoSpan.setAttribute("id", "notice");
+    var parentNode = inputAddress.parentNode;
+    parentNode.insertBefore(infoSpan, inputAddress.nextSibling);
+
+    function geocode() {
+        // Забираем запрос из поля ввода.
+        var request = $(inputAddress).val();
+        
+        // Геокодируем введённые данные.
+        ymaps.geocode(request).then(function (res) {
+            var obj = res.geoObjects.get(0),
+                error, hint;
+
+            if (obj) {
+                // Об оценке точности ответа геокодера можно прочитать тут: https://tech.yandex.ru/maps/doc/geocoder/desc/reference/precision-docpage/
+                switch (obj.properties.get('metaDataProperty.GeocoderMetaData.precision')) {
+                    case 'exact':
+                        break;
+                    case 'number':
+                    case 'near':
+                    case 'range':
+                        error = 'Неточный адрес, требуется уточнение';
+                        hint = 'Уточните номер дома';
+                        break;
+                    case 'street':
+                        error = 'Неполный адрес, требуется уточнение';
+                        hint = 'Уточните номер дома';
+                        break;
+                    case 'other':
+                    default:
+                        error = 'Неточный адрес, требуется уточнение';
+                        hint = 'Уточните адрес';
+                }
+            } else {
+                error = 'Адрес не найден';
+                hint = 'Уточните адрес';
+            }
+
+            // Если геокодер возвращает пустой массив или неточный результат, то показываем ошибку.
+            if (error) {
+                showError(error);
+                showMessage(hint);
+            } else {
+                showResult(obj);
+            }
+        }, function (e) {
+            console.log(e)
+        })
+
+    }
+    function showResult(obj) {
+        // Удаляем сообщение об ошибке, если найденный адрес совпадает с поисковым запросом.
+        $(inputAddress).removeClass('input_error');
+        $('#notice').css('display', 'none');
+
+        var mapContainer = $(mapLoader),
+            bounds = obj.properties.get('boundedBy'),
+        // Рассчитываем видимую область для текущего положения пользователя.
+            mapState = ymaps.util.bounds.getCenterAndZoom(
+                bounds,
+                [mapContainer.width(), mapContainer.height()]
+            ),
+        // Сохраняем полный адрес для сообщения под картой.
+            address = [obj.getCountry(), obj.getAddressLine()].join(', '),
+        // Сохраняем укороченный адрес для подписи метки.
+            shortAddress = [obj.getThoroughfare(), obj.getPremiseNumber(), obj.getPremise()].join(' ');
+        // Убираем контролы с карты.
+        mapState.controls = [];
+        // Создаём карту.
+        createMap(mapState, shortAddress);
+    }
+
+    function showError(message) {
+        $('#notice').text(message);
+        $(inputAddress).addClass('input_error');
+        $('#notice').css('display', 'block');
+        // Удаляем карту.
+        if (map) {
+            map.destroy();
+            map = null;
+        }
+    }
+
+    function createMap(state, caption) {
+        // Если карта еще не была создана, то создадим ее и добавим метку с адресом.
+        if (!map) {
+            map = new ymaps.Map(mapLoader, state);
+            placemark = new ymaps.Placemark(
+                map.getCenter(), {
+                    iconCaption: caption,
+                    balloonContent: caption
+                }, {
+                    preset: 'islands#redDotIconWithCaption'
+                });
+            map.geoObjects.add(placemark);
+            // Если карта есть, то выставляем новый центр карты и меняем данные и позицию метки в соответствии с найденным адресом.
+        } else {
+            map.setCenter(state.center, state.zoom);
+            placemark.geometry.setCoordinates(state.center);
+            placemark.properties.set({iconCaption: caption, balloonContent: caption});
+        }
+    }
+}
+</script>
