@@ -28,16 +28,25 @@
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
             <div class="col-sm-10">
-              <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+              <input type="text" name="address_maps_nik_name" value="{{ address_maps_nik_name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
               {% if error_name %}
               <div class="text-danger">{{ error_name }}</div>
               {% endif %}
             </div>
           </div>
           <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-apikey">{{ entry_apikey }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="address_maps_nik_apikey" value="{{ address_maps_nik_apikey }}" placeholder="{{ entry_apikey }}" id="input-apikey" class="form-control" />
+              {% if error_apikey %}
+                <div class="text-danger">{{ error_apikey }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-class_map_loader">{{ entry_class_map_loader }}</label>
             <div class="col-sm-10">
-              <input type="text" name="class_map_loader" value="{{ class_map_loader }}" placeholder="{{ entry_class_map_loader }}" id="input-class_map_loader" class="form-control" />
+              <input type="text" name="address_maps_nik_class_map_loader" value="{{ address_maps_nik_class_map_loader }}" placeholder="{{ entry_class_map_loader }}" id="input-class_map_loader" class="form-control" />
               {% if error_class_map_loader %}
                 <div class="text-danger">{{ error_class_map_loader }}</div>
               {% endif %}
@@ -45,27 +54,25 @@
           </div>
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-input_address">{{ entry_input_address }}</label>
-            <div class="col-sm-10">
-              <div class="col-sm-6">
-                <input type="text" name="input_address" value="{{ input_address }}" placeholder="{{ entry_input_address }}" id="input-input_address" class="form-control" />
-              </div>
-              <div class="col-sm-6">
-                <select name="input_address_type" id="input-input_address_type" class="form-control">
-                    <option value="0" {% if input_address_type == '0' %}selected="selected"{% endif %}>{{ text_class }}</option>
-                    <option value="1" {% if input_address_type == '1' %}selected="selected"{% endif %}>{{ text_id }}</option>
-                    <option value="2" {% if input_address_type == '2' %}selected="selected"{% endif %}>{{ text_name }}</option>
-                </select>
-              </div>
-              {% if error_input_address %}
-                <div class="text-danger">{{ error_input_address }}</div>
-              {% endif %}
+            <div class="col-sm-5">
+                <input type="text" name="address_maps_nik_input_address" value="{{ address_maps_nik_input_address }}" placeholder="{{ entry_input_address }}" id="input-input_address" class="form-control" />
+                {% if error_input_address %}
+                  <div class="text-danger">{{ error_input_address }}</div>
+                {% endif %}
+            </div>
+            <div class="col-sm-5">
+              <select name="address_maps_nik_input_address_type" id="input-input_address_type" class="form-control">
+                <option value="0" {% if address_maps_nik_input_address_type == '0' %}selected="selected"{% endif %}>{{ text_class }}</option>
+                <option value="1" {% if address_maps_nik_input_address_type == '1' %}selected="selected"{% endif %}>{{ text_id }}</option>
+                <option value="2" {% if address_maps_nik_input_address_type == '2' %}selected="selected"{% endif %}>{{ text_name }}</option>
+              </select>
             </div>
           </div>
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
             <div class="col-sm-10">
-              <select name="status" id="input-status" class="form-control">
-                {% if status %}
+              <select name="address_maps_nik_status" id="input-status" class="form-control">
+                {% if address_maps_nik_status %}
                 <option value="1" selected="selected">{{ text_enabled }}</option>
                 <option value="0">{{ text_disabled }}</option>
                 {% else %}

@@ -7,14 +7,11 @@ class ControllerExtensionModuleAddressMapsNik extends Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$this->load->model('setting/module');
+        $this->load->model('setting/setting');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			if (!isset($this->request->get['module_id'])) {
-				$this->model_setting_module->addModule('address_maps_nik', $this->request->post);
-			} else {
-				$this->model_setting_module->editModule($this->request->get['module_id'], $this->request->post);
-			}
+            $this->model_setting_setting->editSetting('address_maps_nik', $this->request->post);
+            $this->model_setting_setting->editSetting('module_address_maps_nik', array('module_address_maps_nik_status' => $this->request->post['address_maps_nik_status']));
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -27,11 +24,17 @@ class ControllerExtensionModuleAddressMapsNik extends Controller {
 			$data['error_warning'] = '';
 		}
 
-		if (isset($this->error['name'])) {
-			$data['error_name'] = $this->error['name'];
+		if (isset($this->error['apikey'])) {
+			$data['error_apikey'] = $this->error['apikey'];
 		} else {
-			$data['error_name'] = '';
+			$data['error_apikey'] = '';
 		}
+
+        if (isset($this->error['name'])) {
+            $data['error_name'] = $this->error['name'];
+        } else {
+            $data['error_name'] = '';
+        }
 
 		if (isset($this->error['class_map_loader'])) {
 			$data['error_class_map_loader'] = $this->error['class_map_loader'];
@@ -77,50 +80,58 @@ class ControllerExtensionModuleAddressMapsNik extends Controller {
 
 		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
 
-		if (isset($this->request->get['module_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
-			$module_info = $this->model_setting_module->getModule($this->request->get['module_id']);
+		if ($this->request->server['REQUEST_METHOD'] != 'POST') {
+			$module_info = $this->model_setting_setting->getSetting('address_maps_nik');
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
 
-		if (isset($this->request->post['name'])) {
-			$data['name'] = $this->request->post['name'];
+		if (isset($this->request->post['address_maps_nik_name'])) {
+			$data['address_maps_nik_name'] = $this->request->post['address_maps_nik_name'];
 		} elseif (!empty($module_info)) {
-			$data['name'] = $module_info['name'];
+			$data['address_maps_nik_name'] = $module_info['address_maps_nik_name'];
 		} else {
-			$data['name'] = '';
+			$data['address_maps_nik_name'] = '';
 		}
 
-		if (isset($this->request->post['class_map_loader'])) {
-			$data['class_map_loader'] = $this->request->post['class_map_loader'];
+        if (isset($this->request->post['address_maps_nik_apikey'])) {
+            $data['address_maps_nik_apikey'] = $this->request->post['address_maps_nik_apikey'];
+        } elseif (!empty($module_info)) {
+            $data['address_maps_nik_apikey'] = $module_info['address_maps_nik_apikey'];
+        } else {
+            $data['address_maps_nik_apikey'] = '';
+        }
+
+		if (isset($this->request->post['address_maps_nik_class_map_loader'])) {
+			$data['address_maps_nik_class_map_loader'] = $this->request->post['address_maps_nik_class_map_loader'];
 		} elseif (!empty($module_info)) {
-			$data['class_map_loader'] = $module_info['class_map_loader'];
+			$data['address_maps_nik_class_map_loader'] = $module_info['address_maps_nik_class_map_loader'];
 		} else {
-			$data['class_map_loader'] = '';
+			$data['address_maps_nik_class_map_loader'] = '';
 		}
 
-		if (isset($this->request->post['input_address'])) {
-			$data['input_address'] = $this->request->post['input_address'];
+		if (isset($this->request->post['address_maps_nik_input_address'])) {
+			$data['address_maps_nik_input_address'] = $this->request->post['address_maps_nik_input_address'];
 		} elseif (!empty($module_info)) {
-			$data['input_address'] = $module_info['input_address'];
+			$data['address_maps_nik_input_address'] = $module_info['address_maps_nik_input_address'];
 		} else {
-			$data['input_address'] = '';
+			$data['address_maps_nik_input_address'] = '';
 		}
 
-		if (isset($this->request->post['input_address_type'])) {
-			$data['input_address_type'] = $this->request->post['input_address_type'];
+		if (isset($this->request->post['address_maps_nik_input_address_type'])) {
+			$data['address_maps_nik_input_address_type'] = $this->request->post['address_maps_nik_input_address_type'];
 		} elseif (!empty($module_info)) {
-			$data['input_address_type'] = $module_info['input_address_type'];
+			$data['address_maps_nik_input_address_type'] = $module_info['address_maps_nik_input_address_type'];
 		} else {
-			$data['input_address_type'] = '0';
+			$data['address_maps_nik_input_address_type'] = '0';
 		}
 
-		if (isset($this->request->post['status'])) {
-			$data['status'] = $this->request->post['status'];
+		if (isset($this->request->post['address_maps_nik_status'])) {
+			$data['address_maps_nik_status'] = $this->request->post['address_maps_nik_status'];
 		} elseif (!empty($module_info)) {
-			$data['status'] = $module_info['status'];
+			$data['address_maps_nik_status'] = $module_info['address_maps_nik_status'];
 		} else {
-			$data['status'] = '';
+			$data['address_maps_nik_status'] = '';
 		}
 
 		$data['header'] = $this->load->controller('common/header');
@@ -135,15 +146,19 @@ class ControllerExtensionModuleAddressMapsNik extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 64)) {
+		if ((utf8_strlen($this->request->post['address_maps_nik_name']) < 3) || (utf8_strlen($this->request->post['address_maps_nik_name']) > 64)) {
 			$this->error['name'] = $this->language->get('error_name');
 		}
 
-		if (!$this->request->post['class_map_loader']) {
+		if (utf8_strlen($this->request->post['address_maps_nik_apikey']) < 3) {
+			$this->error['apikey'] = $this->language->get('error_apikey');
+		}
+
+		if (!$this->request->post['address_maps_nik_class_map_loader']) {
 			$this->error['class_map_loader'] = $this->language->get('error_class_map_loader');
 		}
 
-		if (!$this->request->post['input_address']) {
+		if (!$this->request->post['address_maps_nik_input_address']) {
 			$this->error['input_address'] = $this->language->get('error_input_address');
 		}
 

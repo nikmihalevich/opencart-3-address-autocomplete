@@ -10,12 +10,12 @@
 $(document).ready(function() {
 
     var findAddressInput = getInputAddress();
-    var mapLoader   = document.getElementsByClassName('{{ input_address }}')[0];
+    var mapLoader   = document.getElementsByClassName('{{ address_maps_nik_input_address }}')[0];
     
     if(!findAddressInput) {
         let interval =  setInterval(function() {
                             findAddressInput = getInputAddress();
-                            mapLoader   = document.getElementsByClassName('{{ class_map_loader }}')[0];
+                            mapLoader   = document.getElementsByClassName('{{ address_maps_nik_class_map_loader }}')[0];
                             
                             if(findAddressInput) {
                                 clearInterval(interval);
@@ -27,12 +27,12 @@ $(document).ready(function() {
 
 function getInputAddress() {
     var el;
-    if('{{ input_address_type }}' === '0') {
-        el = document.getElementsByClassName('{{ input_address }}')[0];
-    } else if ('{{ input_address_type }}' === '1') {
-        el = document.getElementById('{{ input_address }}');
+    if('{{ address_maps_nik_input_address_type }}' === '0') {
+        el = document.getElementsByClassName('{{ address_maps_nik_input_address }}')[0];
+    } else if ('{{ address_maps_nik_input_address_type }}' === '1') {
+        el = document.getElementById('{{ address_maps_nik_input_address }}');
     } else {
-        el = document.getElementsByName('{{ input_address }}')[0];
+        el = document.getElementsByName('{{ address_maps_nik_input_address }}')[0];
     }
     return el;
 }
