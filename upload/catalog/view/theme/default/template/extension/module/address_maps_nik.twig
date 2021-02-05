@@ -5,7 +5,7 @@
         display: none;
     }
 </style>
-<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=287f9eb4-814a-4af3-9e64-9d6c7e5f48d5" type="text/javascript"></script>
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey={{ address_maps_nik_apikey }}" type="text/javascript"></script>
 <script type="text/javascript">
 $(document).ready(function() {
 
@@ -21,7 +21,7 @@ $(document).ready(function() {
                                 clearInterval(interval);
                                 ymaps.ready(yMapsInit(findAddressInput, mapLoader));
                             }
-                        }, 2000)
+                        }, 1000)
     }
 })
 
@@ -38,7 +38,9 @@ function getInputAddress() {
 }
 
 function yMapsInit(inputAddress, mapLoader) {
-    console.log(inputAddress)
+    if($(inputAddress).val()) {
+        geocode();
+    }
     // Подключаем поисковые подсказки к полю ввода.
     var suggestView = new ymaps.SuggestView(inputAddress),
         map,
@@ -48,11 +50,21 @@ function yMapsInit(inputAddress, mapLoader) {
         geocode();
     })
     
+    initMap()
+    
     var infoSpan = document.createElement("p");
         infoSpan.innerHTML = '213';
         infoSpan.setAttribute("id", "notice");
     var parentNode = inputAddress.parentNode;
     parentNode.insertBefore(infoSpan, inputAddress.nextSibling);
+
+    function initMap () {
+        map = new ymaps.Map(mapLoader, {
+            center: [59.94, 30.32],
+            zoom: 11
+        }, {});
+    
+    }
 
     function geocode() {
         // Забираем запрос из поля ввода.
@@ -147,9 +159,21 @@ function yMapsInit(inputAddress, mapLoader) {
             map.geoObjects.add(placemark);
             // Если карта есть, то выставляем новый центр карты и меняем данные и позицию метки в соответствии с найденным адресом.
         } else {
+        console.log(placemark);
             map.setCenter(state.center, state.zoom);
-            placemark.geometry.setCoordinates(state.center);
-            placemark.properties.set({iconCaption: caption, balloonContent: caption});
+            if(!placemark) {
+                placemark = new ymaps.Placemark(
+                map.getCenter(), {
+                    iconCaption: caption,
+                    balloonContent: caption
+                }, {
+                    preset: 'islands#redDotIconWithCaption'
+                });
+                map.geoObjects.add(placemark);
+            } else {
+                placemark.geometry.setCoordinates(state.center);
+                placemark.properties.set({iconCaption: caption, balloonContent: caption});
+            }
         }
     }
 }
